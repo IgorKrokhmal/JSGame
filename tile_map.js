@@ -45,7 +45,7 @@ export default class tileMap {
               this.tileSize,
               this.tileSize
             );
-          } else {
+          } else if (tile.type === 2) {
             ctx.drawImage(this.enemy, hexX, hexY, this.tileSize, this.tileSize);
           }
         }
@@ -63,7 +63,7 @@ export default class tileMap {
     canvas.width = arr[0].length * this.tileSize;
   }
 
-  changeTilesOnAttack() {
+  changeTilesAtAttack() {
     for (let row = 0; row < this.level.length; row++) {
       for (let column = 0; column < this.level[row].length; column++) {
         if (this.level[row][column] === 3) {

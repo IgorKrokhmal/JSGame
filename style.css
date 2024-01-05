@@ -56,9 +56,27 @@ button {
   border-radius: 10px;
 }
 
-#turn_count {
+#turn_count,
+#score {
   font-family: "Times New Roman", Times, serif;
   font-size: 30px;
-  margin-top: 60%; /* Розміщує елемент внизу колонки */
   margin-left: -20%;
+}
+
+.attack_buttons {
+  display: none;
+}
+
+.main_buttons {
+  display: block;
+}
+
+.description-popup {
+  margin-left: 30vh;
+  font-size: 20px;
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 5px;
+  z-index: 999; /* Підняти поверх інших елементів */
 }

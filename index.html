@@ -10,11 +10,45 @@
   <body>
     <canvas id="game"></canvas>
     <nav>
-      <button id="attack">Attack</button>
-      <button id="heal">Heal 6hp</button>
-      <button id="block">Block 4hp(2 moves)</button>
-      <button id="move">Move</button>
-      <p id="turn_count"></p>
+      <button id="attack" class="main_buttons" data-description="Опціїї атаки">
+        Attack
+      </button>
+      <button
+        id="single_attack"
+        class="attack_buttons"
+        data-description="Атакувати одиночну ціль"
+      >
+        Single target
+      </button>
+      <button
+        id="round_attack"
+        class="attack_buttons"
+        data-description="Атакувати всіх навколо"
+      >
+        Round target
+      </button>
+      <button id="return" class="attack_buttons" data-description="Повернутися">
+        🔙
+      </button>
+      <button
+        id="heal"
+        class="main_buttons"
+        data-description="Полікувати 6 здоров'я"
+      >
+        Heal 6hp
+      </button>
+      <button
+        id="block"
+        class="main_buttons"
+        data-description="Накласти на персонажа блок по 4 здоров'я на 2 ходи"
+      >
+        Block 4hp
+      </button>
+      <button id="move" class="main_buttons" data-description="Походити">
+        Move
+      </button>
+      <p id="score" data-description="Очки">SCORE:0</p>
+      <p id="turn_count" data-description="Кількість ходів">TURN:0</p>
     </nav>
     <aside id="info">some text</aside>
 

@@ -1,11 +1,24 @@
 "use strict";
 import tileMapClass from "./tile_map.js";
+import DescriptionHandler from "./description_nav.js";
 //оголошення змінних з документа
 var infoElement = document.getElementById("info");
 const canvas = document.getElementById("game");
 const moveButton = document.getElementById("move");
 const attackButton = document.getElementById("attack");
+const roundAttackButton = document.getElementById("round_attack");
+const singleAttackButton = document.getElementById("single_attack");
+const returnButton = document.getElementById("return");
+const mainButtons = document.getElementsByClassName("main_buttons");
+const attackButtons = document.getElementsByClassName("attack_buttons");
 var turnElement = document.getElementById("turn_count");
+var scoreElement = document.getElementById("score");
+
+function changeDisplayStyle(elements, displayValue) {
+  for (let i = 0; i < elements.length; i++) {
+    elements[i].style.display = displayValue;
+  }
+}
 //Карта
 //0-hex
 //1-hero
@@ -28,9 +41,12 @@ const tileSize = 512;
 
 let tileMap = new tileMapClass(tileSize, level);
 
-let turnCounter = 1;
+let Description = new DescriptionHandler();
 
-function attackTileWithHero(event, tileMap) {
+let turnCounter = 1;
+let scoreCounter = 0;
+
+function roundAttackTileWithHero(event, tileMap) {
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;
@@ -40,27 +56,34 @@ function attackTileWithHero(event, tileMap) {
   const column = Math.floor(x / tileSize);
   const row = Math.floor(y / tileSize);
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // if (
-  //   row >= 0 &&
-  //   row < tileMap.level.length &&
-  //   column >= 0 &&
-  //   column < tileMap.level[row].length
-  // ) {
-  //   if (tileMap.level[row][column].type === 4) {
-  //     for (let i = 0; i < tileMap.level.length; i++) {
-  //       for (let j = 0; j < tileMap.level[i].length; j++) {
-  //         if (tileMap.level[i][j].type === 4) {
-  //           tileMap.level[i][j].type = 2;
-  //         }
-  //       }
-  //     }
+  if (
+    row >= 0 &&
+    row < tileMap.level.length &&
+    column >= 0 &&
+    column < tileMap.level[row].length
+  ) {
+    if (tileMap.level[row][column].canBeAttacked === true) {
+      for (let i = 0; i < tileMap.level.length; i++) {
+        for (let j = 0; j < tileMap.level[i].length; j++) {
+          if (tileMap.level[i][j].canBeAttacked === true) {
+            scoreCounter += Math.trunc(
+              (tileMap.level[i][j].enemy.hitpoints *
+                Math.trunc(hero.attack / 2)) /
+                2
+            );
+            tileMap.level[i][j].enemy.hitpoints -= Math.trunc(hero.attack / 2);
+            scoreElement.textContent = `SCORE:${scoreCounter}`;
+            if (tileMap.level[i][j].enemy.hitpoints <= 0)
+              tileMap.level[i][j] = 0;
+          }
+        }
+      }
 
-  //     tileMap.level[row][column] = 1;
-  //     tileMap.drawMap(ctx, tileMap.level);
-  //     turnElement.textContent = `TURN:${turnCounter}`;
-  //     turnCounter++;
-  //   }
-  // }
+      tileMap.drawMap(ctx, tileMap.level);
+      turnElement.textContent = `TURN:${turnCounter}`;
+      turnCounter++;
+    }
+  }
 }
 
 function replaceTileWithHero(event, tileMap) {
@@ -109,24 +132,34 @@ function replaceTileWithHero(event, tileMap) {
 moveButton.addEventListener(
   "click",
   function () {
-    movebleHex(this.level, 3);
+    movebleHex(this.level);
     this.drawMap(ctx, this.level);
     console.log(this.level);
   }.bind(tileMap)
 );
+attackButton.addEventListener("click", function () {
+  changeDisplayStyle(mainButtons, "none");
+  changeDisplayStyle(attackButtons, "block");
+});
+returnButton.addEventListener("click", function () {
+  changeDisplayStyle(mainButtons, "block");
+  changeDisplayStyle(attackButtons, "none");
+});
 
-attackButton.addEventListener(
+roundAttackButton.addEventListener(
   "click",
   function () {
     attackebleHex(this.level);
     this.drawMap(ctx, this.level);
-    this.changeTilesOnAttack();
+    this.changeTilesAtAttack();
     console.log(this.level);
   }.bind(tileMap)
 );
+singleAttackButton.addEventListener("click", function () {});
 
 canvas.addEventListener("click", function (event) {
   replaceTileWithHero(event, tileMap);
+  roundAttackTileWithHero(event, tileMap);
 });
 
 function infoAbout(arr) {
@@ -147,7 +180,7 @@ function infoAbout(arr) {
       } else {
         infoElement.textContent = `Enemy: Hitpoints - ${tileMap.level[row][column].enemy.hitpoints} ❤️, Attack - ${tileMap.level[row][column].enemy.attack} ⚔️`;
       }
-      infoElement.style.display = `block`;
+      infoElement.style.display = "block";
     } else {
       infoElement.style.display = "none";
     }
@@ -161,7 +194,7 @@ canvas.addEventListener("mousemove", function (event) {
 });
 
 //опції ходу
-function movebleHex(arr, index) {
+function movebleHex(arr) {
   for (let row = 0; row < arr.length; row++) {
     for (let column = 0; column < arr[row].length; column++) {
       let tile = arr[row][column];
@@ -170,32 +203,32 @@ function movebleHex(arr, index) {
         if (row > 0 && arr[row - 1][column] === -1) {
           // Встановлення значення 3 біля -1
           if (column > 0 && arr[row - 1][column - 1] === 0) {
-            arr[row - 1][column - 1] = index;
+            arr[row - 1][column - 1] = 3;
           }
           if (arr[row - 1][column + 1] === 0) {
-            arr[row - 1][column + 1] = index;
+            arr[row - 1][column + 1] = 3;
           }
         }
 
         // Обирання сусідніх нулів в рядку з 1
         // Обирання 0 на 2 рядка вище від 1 в тій же позиції
         if (row > 1 && arr[row - 2][column] === 0) {
-          arr[row - 2][column] = index;
+          arr[row - 2][column] = 3;
         }
 
         // Обирання 0 на 2 рядка нижче від 1 в тій же позиції
         if (row < arr.length - 2 && arr[row + 2][column] === 0) {
-          arr[row + 2][column] = index;
+          arr[row + 2][column] = 3;
         }
 
         // Обирання сусідніх нулів в рядку під 1
         if (row < arr.length - 1) {
           if (arr[row + 1][column] === -1) {
             if (column > 0 && arr[row + 1][column - 1] === 0) {
-              arr[row + 1][column - 1] = index;
+              arr[row + 1][column - 1] = 3;
             }
             if (arr[row + 1][column + 1] === 0) {
-              arr[row + 1][column + 1] = index;
+              arr[row + 1][column + 1] = 3;
             }
           }
         }

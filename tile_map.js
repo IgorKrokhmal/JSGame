@@ -32,8 +32,8 @@ export default class tileMap {
           ctx.drawImage(this.hex, hexX, hexY, this.tileSize, this.tileSize);
         }
 
-        if (tile === 1 || tile === 3) {
-          const image = tile === 1 ? this.hero : this.movebleHexImg;
+        if (tile.type === 1 || tile === 3) {
+          const image = tile.type === 1 ? this.hero : this.movebleHexImg;
           ctx.drawImage(image, hexX, hexY, this.tileSize, this.tileSize);
         } else if (tile.type === 2) {
           ctx.drawImage(this.hex, hexX, hexY, this.tileSize, this.tileSize);
